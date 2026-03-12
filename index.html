@@ -1,5 +1,97 @@
-<script>
-  window.onload = function() {
-    window.location.href = "game.html"; 
-  };
-</script>   
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Loading</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: radial-gradient(circle at center, #0a0a1f, #000000);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        #loader-container {
+            position: relative;
+            width: 620px;
+            height: 620px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader-container"></div>
+
+    <script>
+        window.onload = function() {
+            // === NEON CRYSTAL LOADER (keeps your original style) ===
+            function createNeonCrystalLoader(parentElement) {
+                if (!parentElement) return null;
+                const STYLE_ID = 'neon-crystal-loader-css';
+                if (!document.getElementById(STYLE_ID)) {
+                    const style = document.createElement('style');
+                    style.id = STYLE_ID;
+                    style.textContent = `
+                        #rings-container { position: absolute; inset: 0; overflow: hidden; perspective: 1200px; }
+                        .loading-ring { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 2.5px solid rgba(255,255,255,0.12); border-radius: 50%; animation: ringOrbit linear infinite; will-change: transform; backface-visibility: hidden; }
+                        .ring-inner  { width: 188px; height: 188px; animation-duration: 10.8s; }
+                        .ring-mid    { width: 355px; height: 355px; animation-duration: 16.2s; }
+                        .ring-outer  { width: 518px; height: 518px; animation-duration: 23.5s; }
+                        @keyframes ringOrbit { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+                        .loading-shape { position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; filter: drop-shadow(0 0 22px currentColor); animation: shapeSpin 2.75s linear infinite; will-change: transform; backface-visibility: hidden; transform: translate(-50%, -50%) rotate(var(--start-angle)) translateY(calc(-1 * var(--orbit-radius))) rotate(calc(-1 * var(--start-angle))); background: conic-gradient(currentColor, #ffffff, currentColor); clip-path: polygon(50% 6%, 88% 29%, 94% 55%, 82% 84%, 50% 95%, 18% 84%, 6% 55%, 13% 29%); box-shadow: 0 0 12px #fff, 0 0 28px currentColor, 0 0 62px currentColor, inset 0 0 24px rgba(255,255,255,0.85); }
+                        @keyframes shapeSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                        #central-crystal { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 92px; height: 195px; background: conic-gradient(#ff00ff, #00ffff, #ffff00, #00ff88, #ff0088, #0088ff, #8800ff, #ff00ff); clip-path: polygon(50% 0%, 85% 20%, 100% 50%, 85% 80%, 50% 100%, 15% 80%, 0% 50%, 15% 20%); box-shadow: 0 0 40px #fff, 0 0 90px #00ffff, inset 0 0 60px #ffff00; animation: crystalRotateSmooth 18s linear infinite, crystalGlow 2.2s ease-in-out infinite alternate; z-index: 20; will-change: transform, filter; }
+                        @keyframes crystalRotateSmooth { from { transform: translate(-50%, -50%) rotateY(0deg); } to { transform: translate(-50%, -50%) rotateY(360deg); } }
+                        @keyframes crystalGlow { from { filter: brightness(1) hue-rotate(0deg); box-shadow: 0 0 40px #fff, 0 0 90px #00ffff; } to { filter: brightness(2.2) hue-rotate(360deg); box-shadow: 0 0 90px #fff, 0 0 160px #ffff00, inset 0 0 110px #00ffff; } }
+                        #central-crystal::before, #central-crystal::after { content: ''; position: absolute; inset: 0; background: inherit; clip-path: inherit; animation: facetSwirl 3.1s ease-in-out infinite alternate; opacity: 0.55; will-change: transform, filter; }
+                        #central-crystal::before { animation-delay: 0.4s; transform: scale(1.12) rotate(12deg); }
+                        #central-crystal::after  { animation-delay: 0.9s; transform: scale(0.88) rotate(-12deg); }
+                        @keyframes facetSwirl { 0% { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); } 100% { transform: scale(1.18) rotate(32deg); filter: hue-rotate(240deg); } }
+                    `;
+                    document.head.appendChild(style);
+                }
+
+                let container = document.getElementById('rings-container');
+                if (!container) { container = document.createElement('div'); container.id = 'rings-container'; parentElement.appendChild(container); }
+                let crystal = document.getElementById('central-crystal');
+                if (!crystal) { crystal = document.createElement('div'); crystal.id = 'central-crystal'; container.appendChild(crystal); }
+                container.querySelectorAll('.loading-ring').forEach(r => r.remove());
+
+                const ringConfigs = [
+                    { className: 'ring-inner',  radius: 78,  count: 7,  color: '#00f0ff' },
+                    { className: 'ring-mid',    radius: 154, count: 9,  color: '#ff00cc' },
+                    { className: 'ring-outer',  radius: 235, count: 11, color: '#ccff00' }
+                ];
+
+                ringConfigs.forEach(cfg => {
+                    const ring = document.createElement('div');
+                    ring.className = `loading-ring ${cfg.className}`;
+                    container.appendChild(ring);
+                    for (let i = 0; i < cfg.count; i++) {
+                        const angle = (i * (360 / cfg.count)) + (Math.random() * 18 - 9);
+                        const shape = document.createElement('div');
+                        shape.className = 'loading-shape';
+                        shape.style.setProperty('--start-angle', `${angle}deg`);
+                        shape.style.setProperty('--orbit-radius', `${cfg.radius}px`);
+                        shape.style.color = cfg.color;
+                        ring.appendChild(shape);
+                    }
+                });
+                return { destroy: () => container.remove() };
+            }
+
+            // Start the loader (exactly like you asked)
+            const loader = createNeonCrystalLoader(document.getElementById('loader-container'));
+
+            // Wait 4.5 seconds (change number if you want), then go to game.html
+            setTimeout(() => {
+                loader.destroy();
+                window.location.href = "game.html";
+            }, 4500);
+        };
+    </script>
+
+</body>
+</html>
