@@ -92,3 +92,13 @@ Made with love, Three.js, and pure spite toward modern gaming.
 Now go die gloriously.
 
 **Press Q to give up and sacrifice honor.**
+# THE END OF AAA GAMING
+
+**Single-file neon roguelike FPS.** No bloat. No patches. Just pure chaotic death.
+
+**Live** → [https://boogercheeseonrye.github.io/THE.END.OF.AAA.GAMING/game.html](https://boogercheeseonrye.github.io/THE.END.OF.AAA.GAMING/game.html)  
+**Repo** → [github.com/BoogerCheeseOnRye/THE.END.OF.AAA.GAMING](https://github.com/BoogerCheeseOnRye/THE.END.OF.AAA.GAMING)
+
+**Sister creation** → **[VOIDSCREAM](https://boogercheeseonrye.free.nf/?i=1)** – the temporary neon scream chamber that shares the same void aesthetic.
+
+Built in one HTML file. Infinite replay. Pure browser energy.
