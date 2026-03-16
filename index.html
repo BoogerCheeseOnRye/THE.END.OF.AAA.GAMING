@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <style>
-        /* INLINE LOADER — never black again */
         body { margin:0;overflow:hidden;background:#000;font-family:monospace; perspective:1200px; }
         #ncl-crystal-loader { position:absolute;inset:0;z-index:300;background:#000;display:flex;align-items:center;justify-content:center;perspective:1200px; }
         #rings-container { position:absolute;inset:0;overflow:hidden;perspective:1200px; }
@@ -20,14 +19,18 @@
         #central-crystal { position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:92px;height:195px;background:conic-gradient(#ff00ff,#00ffff,#ffff00,#00ff88,#ff0088,#0088ff,#8800ff,#ff00ff);clip-path:polygon(50% 0%,85% 20%,100% 50%,85% 80%,50% 100%,15% 80%,0% 50%,15% 20%);box-shadow:0 0 40px #fff,0 0 90px #00ffff,inset 0 0 60px #ffff00;animation:crystalRotateSmooth 18s linear infinite,crystalGlow 2.2s ease-in-out infinite alternate;z-index:20;will-change:transform,filter; }
         @keyframes crystalRotateSmooth { from{transform:translate(-50%,-50%) rotateY(0deg);} to{transform:translate(-50%,-50%) rotateY(360deg);} }
         @keyframes crystalGlow { from{filter:brightness(1) hue-rotate(0deg);box-shadow:0 0 40px #fff,0 0 90px #00ffff;} to{filter:brightness(2.2) hue-rotate(360deg);box-shadow:0 0 90px #fff,0 0 160px #ffff00,inset 0 0 110px #00ffff;} }
+        #menu-screen { position:absolute;inset:0;z-index:200;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;color:#ff00aa; }
         .hidden { opacity:0;pointer-events:none; }
     </style>
 </head>
 <body>
     <div id="ncl-crystal-loader">
         <div id="rings-container"></div>
-        <!-- fallback so you NEVER see pure black -->
         <div style="color:#ff00aa;font-size:48px;font-weight:900;letter-spacing:8px;text-shadow:0 0 40px #ff00aa;position:absolute;z-index:10;">TO VALHALLA</div>
+    </div>
+    <div id="menu-screen" class="hidden">
+        <div id="game-title">THE.END.OF.AAA.GAMING</div>
+        <div onclick="startGame()" class="title-button">ENTER THE VOID</div>
     </div>
     <canvas id="game-canvas" style="display:block;z-index:5;"></canvas>
     <div id="overlay"></div>
@@ -39,7 +42,10 @@
         window.addEventListener('load', () => {
             const loaderDiv = document.getElementById('ncl-crystal-loader');
             createNeonCrystalLoader(loaderDiv);
-            initGame();
+            setTimeout(() => {
+                document.getElementById('ncl-crystal-loader').style.opacity = '0';
+                setTimeout(() => document.getElementById('menu-screen').classList.remove('hidden'), 800);
+            }, 2200);
         });
     </script>
 </body>
