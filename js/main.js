@@ -4,12 +4,17 @@ import { AcidDreamEnemy } from './acid-dream-enemy.js';
 import { InputManager } from './input-manager.js';
 
 export function initGame() {
-  createStartScreen();   // fixes your exact error
+  createStartScreen();
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
-  const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('game-canvas'), antialias: true });
+  const renderer = new THREE.WebGLRenderer({ 
+    canvas: document.getElementById('game-canvas'), 
+    antialias: true,
+    alpha: false 
+  });
   renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
   const sky = new MultiverseSky(scene);
   const enemies = [];
@@ -25,8 +30,10 @@ export function initGame() {
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
   }
+
   window.startGame = () => {
-    document.getElementById('overlay').classList.add('hidden');
+    const overlay = document.getElementById('overlay');
+    if (overlay) overlay.classList.add('hidden');
     animate();
   };
 }
