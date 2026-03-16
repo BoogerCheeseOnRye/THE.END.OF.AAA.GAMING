@@ -1,12 +1,10 @@
 let scene, camera, renderer, clock, enemies = [], player, keys = {}, isGameRunning = false;
 const pastelColors = [0xff99cc, 0x99ffff, 0xffff99, 0xcc99ff];
 
-function createNeonCrystalLoader(parentElement) {
-    const container = document.createElement('div');
-    container.id = 'rings-container';
-    parentElement.appendChild(container);
-    const crystal = document.createElement('div');
-    crystal.id = 'central-crystal';
+function createNeonCrystalLoader(parent) {
+    const container = document.createElement('div'); container.id = 'rings-container';
+    parent.appendChild(container);
+    const crystal = document.createElement('div'); crystal.id = 'central-crystal';
     container.appendChild(crystal);
     const ringConfigs = [
         {className:'ring-inner', radius:78, count:7, color:'#00f0ff'},
@@ -14,14 +12,11 @@ function createNeonCrystalLoader(parentElement) {
         {className:'ring-outer', radius:235, count:11, color:'#ccff00'}
     ];
     ringConfigs.forEach(cfg => {
-        const ring = document.createElement('div');
-        ring.className = `loading-ring ${cfg.className}`;
+        const ring = document.createElement('div'); ring.className = `loading-ring ${cfg.className}`;
         container.appendChild(ring);
         for (let i = 0; i < cfg.count; i++) {
-            const angle = (i * (360 / cfg.count)) + (Math.random() * 18 - 9);
-            const shape = document.createElement('div');
-            shape.className = 'loading-shape';
-            shape.style.setProperty('--start-angle', `${angle}deg`);
+            const shape = document.createElement('div'); shape.className = 'loading-shape';
+            shape.style.setProperty('--start-angle', `${(i * (360 / cfg.count)) + (Math.random() * 18 - 9)}deg`);
             shape.style.setProperty('--orbit-radius', `${cfg.radius}px`);
             shape.style.color = cfg.color;
             ring.appendChild(shape);
@@ -34,60 +29,63 @@ class CubeBlobHumanoid extends THREE.Group {
         super();
         this.cubes = [];
         this.basePositions = [];
-        const numCubes = isElite ? 180 : 68;
-        const pastel = pastelColors;
-        for (let i = 0; i < numCubes; i++) {
-            const geo = new THREE.BoxGeometry(0.18, 0.18, 0.18);
+        const num = isElite ? 180 : 68;
+        const size = 0.18;
+        // tight connected humanoid mesh (every cube touches 2+ others)
+        for (let i = 0; i < num; i++) {
+            const geo = new THREE.BoxGeometry(size, size, size);
             const mat = new THREE.MeshPhongMaterial({
-                color: pastel[i % 4],
-                emissive: pastel[i % 4],
-                emissiveIntensity: 9.5,
-                shininess: 15
+                color: pastelColors[i % 4],
+                emissive: pastelColors[i % 4],
+                emissiveIntensity: 9.8,
+                shininess: 14
             });
             const cube = new THREE.Mesh(geo, mat);
-            let x = (Math.random() - 0.5) * 1.2;
-            let y = 0.6 + (i % 18) * 0.22;
-            let z = (Math.random() - 0.5) * 1.2;
-            if (i < 30) y += 0.8; // torso stack
-            else if (i < 45) { x = i % 2 ? -0.7 : 0.7; y = 1.4; } // arms
-            else if (i < 60) { x = i % 2 ? -0.5 : 0.5; y = 0.4; } // legs
-            else if (i < 70) y = 2.1; // head
+            // connected grid positions
+            let x = ((i % 6) - 2.5) * 0.19;
+            let y = 0.6 + Math.floor(i / 6) * 0.19;
+            let z = (Math.random() - 0.5) * 0.12;
+            if (i < 36) y += 0.9; // dense torso
+            else if (i < 54) { x = (i % 2 ? -0.75 : 0.75); y = 1.4 + (i % 9) * 0.19; } // arms
+            else if (i < 72) { x = (i % 2 ? -0.55 : 0.55); y = 0.4 + (i % 9) * 0.19; } // legs
+            else if (i < 90) y = 2.2; // head cluster
             cube.position.set(x, y, z);
             this.basePositions.push(cube.position.clone());
             this.add(cube);
             this.cubes.push(cube);
         }
         this.pulsePhase = Math.random() * Math.PI * 2;
-        this.userData = { health: isElite ? 240 : 95, maxHealth: isElite ? 240 : 95, speed: isElite ? 9.5 : 7.2, isElite };
+        this.userData = { health: isElite ? 240 : 95, maxHealth: isElite ? 240 : 95, speed: isElite ? 9.2 : 7.1, isElite };
         scene.add(this);
     }
-    update(delta, t) {
-        const pulse = 1 + Math.sin(t * 4.2 + this.pulsePhase) * 0.11;
+    update(t) {
+        const pulse = 1 + Math.sin(t * 3.8 + this.pulsePhase) * 0.095;
         this.scale.setScalar(pulse);
         this.cubes.forEach((c, i) => {
             const base = this.basePositions[i];
-            const warpX = Math.sin(t * 6.8 + i) * 0.09;
-            const warpY = Math.sin(t * 5.3 + i * 1.4) * 0.13;
-            const warpZ = Math.cos(t * 4.1 + i * 0.8) * 0.07;
-            c.position.x = base.x + warpX;
-            c.position.y = base.y + warpY;
-            c.position.z = base.z + warpZ;
-            c.rotation.y = t * (1.9 + i * 0.03);
-            if (i > 60) c.rotation.x = t * 2.4 + i;
+            const warp = 0.085; // tight so cubes never separate
+            c.position.x = base.x + Math.sin(t * 7.2 + i) * warp;
+            c.position.y = base.y + Math.sin(t * 5.9 + i * 1.3) * warp;
+            c.position.z = base.z + Math.cos(t * 4.4 + i) * warp;
+            c.rotation.y = t * (2.1 + i * 0.02);
+            if (i > 90) c.rotation.x = t * 2.7 + i;
         });
-        this.position.y += Math.sin(t * 9) * 0.035;
+        this.position.y += Math.sin(t * 8) * 0.028;
     }
 }
 
 function createTerrain() {
-    const terrain = new THREE.Group();
-    const floorGeo = new THREE.PlaneGeometry(400, 400, 128, 128);
-    const floorMat = new THREE.MeshPhongMaterial({color: 0x112233, emissive: 0x00ffff, emissiveIntensity: 0.3, shininess: 8});
-    const floor = new THREE.Mesh(floorGeo, floorMat);
+    const geo = new THREE.PlaneGeometry(420, 420, 92, 92);
+    const mat = new THREE.MeshPhongMaterial({
+        color: 0x220033,
+        emissive: 0xff0088,
+        emissiveIntensity: 0.65,
+        shininess: 6
+    });
+    const floor = new THREE.Mesh(geo, mat);
     floor.rotation.x = -Math.PI / 2;
-    terrain.add(floor);
-    scene.add(terrain);
-    return terrain;
+    scene.add(floor);
+    return {floor, mat, geo};
 }
 
 function startGame() {
@@ -99,30 +97,29 @@ function startGame() {
 
 function initGameCore() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x110022, 8, 280);
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    scene.fog = new THREE.Fog(0x110022, 12, 260);
+    camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({canvas: document.getElementById('game-canvas'), antialias: true});
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     clock = new THREE.Clock();
 
-    scene.add(new THREE.HemisphereLight(0x00ffff, 0xff00aa, 0.9));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
-    dirLight.position.set(30, 120, 40);
-    scene.add(dirLight);
-    scene.add(new THREE.AmbientLight(0x334455, 0.7));
+    scene.add(new THREE.HemisphereLight(0x00ffff, 0xff0088, 1.1));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.45); dir.position.set(40, 130, 50);
+    scene.add(dir);
+    scene.add(new THREE.AmbientLight(0x445566, 0.8));
 
-    createTerrain();
+    const terrain = createTerrain();
 
     player = new THREE.Object3D();
-    player.position.set(0, 1.6, 15);
-    camera.position.set(0, 1.6, 15);
+    player.position.set(0, 1.65, 18);
+    camera.position.copy(player.position);
     scene.add(player);
 
     window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.aspect = innerWidth / innerHeight;
         camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(innerWidth, innerHeight);
     });
 
     document.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
@@ -130,72 +127,67 @@ function initGameCore() {
     document.addEventListener('mousedown', shoot);
 
     spawnInitialEnemies();
-    animate();
+    animate(terrain);
 }
 
 function spawnInitialEnemies() {
-    for (let i = 0; i < 5; i++) {
-        const enemy = new CubeBlobHumanoid(Math.random() < 0.35);
-        enemy.position.set((Math.random() - 0.5) * 70, 1, (Math.random() - 0.5) * 70);
-        enemies.push(enemy);
-    }
-}
-
-function spawnEnemies() {
-    if (enemies.length < 7 && Math.random() < 0.04) {
-        const enemy = new CubeBlobHumanoid(Math.random() < 0.35);
-        enemy.position.set(player.position.x + (Math.random() - 0.5) * 50, 1, player.position.z + (Math.random() - 0.5) * 50);
-        enemies.push(enemy);
+    for (let i = 0; i < 6; i++) {
+        const e = new CubeBlobHumanoid(Math.random() < 0.3);
+        e.position.set((Math.random() - 0.5) * 80, 0, (Math.random() - 0.5) * 80);
+        enemies.push(e);
     }
 }
 
 function shoot() {
-    if (!isGameRunning) return;
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-    const intersects = raycaster.intersectObjects(enemies, true);
-    if (intersects.length > 0) {
-        let target = intersects[0].object;
-        while (target && !(target.parent instanceof CubeBlobHumanoid)) target = target.parent;
-        if (target && target.parent.userData.health) {
-            target.parent.userData.health -= 35;
-            if (target.parent.userData.health <= 0) {
-                scene.remove(target.parent);
-                enemies.splice(enemies.indexOf(target.parent), 1);
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(new THREE.Vector2(0, 0), camera);
+    const hits = ray.intersectObjects(enemies, true);
+    if (hits.length) {
+        let obj = hits[0].object;
+        while (obj && !(obj.parent instanceof CubeBlobHumanoid)) obj = obj.parent;
+        if (obj && obj.parent.userData.health) {
+            obj.parent.userData.health -= 38;
+            if (obj.parent.userData.health <= 0) {
+                scene.remove(obj.parent);
+                enemies.splice(enemies.indexOf(obj.parent), 1);
             }
         }
     }
 }
 
-function animate() {
-    requestAnimationFrame(animate);
+function animate(terrain) {
+    requestAnimationFrame(() => animate(terrain));
     if (!isGameRunning) return;
     const delta = clock.getDelta();
     const t = clock.getElapsedTime();
 
-    const speed = 22 * delta;
+    // player move
+    const speed = 23 * delta;
     if (keys['w']) player.position.z -= speed;
     if (keys['s']) player.position.z += speed;
     if (keys['a']) player.position.x -= speed;
     if (keys['d']) player.position.x += speed;
     camera.position.copy(player.position);
-    camera.position.y = 1.6;
+    camera.position.y = 1.65;
 
-    enemies.forEach((e, idx) => {
+    // horror terrain pulse
+    terrain.mat.emissive.setHSL(0.82 + Math.sin(t * 0.4) * 0.08, 1, 0.5);
+
+    // enemies
+    enemies.forEach((e, i) => {
         if (e instanceof CubeBlobHumanoid) {
-            e.update(delta, t);
-            const dir = player.position.clone().sub(e.position).normalize();
-            dir.y = 0;
+            e.update(t);
+            const dir = player.position.clone().sub(e.position);
+            dir.y = 0; dir.normalize();
             e.position.x += dir.x * e.userData.speed * delta;
             e.position.z += dir.z * e.userData.speed * delta;
-            if (player.position.distanceTo(e.position) < 2.2) e.userData.health -= 12 * delta;
+            if (player.position.distanceTo(e.position) < 2.1) e.userData.health -= 14 * delta;
             if (e.userData.health <= 0) {
                 scene.remove(e);
-                enemies.splice(idx, 1);
+                enemies.splice(i, 1);
             }
         }
     });
 
-    spawnEnemies();
     renderer.render(scene, camera);
 }
