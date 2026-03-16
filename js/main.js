@@ -1,5 +1,6 @@
-let scene, camera, renderer, clock, enemies = [], player, keys = {}, isGameRunning = false;
+let scene, camera, renderer, clock, enemies = [], player, keys = {}, isGameRunning = false, yaw = 0, pitch = 0;
 const pastelColors = [0xff99cc, 0x99ffff, 0xffff99, 0xcc99ff];
+let gamepad = null;
 
 function createNeonCrystalLoader(parent) {
     const container = document.createElement('div'); container.id = 'rings-container';
@@ -25,63 +26,54 @@ class CubeBlobHumanoid extends THREE.Group {
         super();
         this.cubes = [];
         this.basePositions = [];
-        this.scale.setScalar(isElite ? 4.2 : 3.8); // MUCH LARGER
-        const numCubes = isElite ? 920 : 420;
-        const size = 0.52; // bigger cubes to fill gaps
-        // dense connected skeleton + hair/spikes/weapon
+        this.scale.setScalar(isElite ? 4.1 : 3.7);
+        const numCubes = isElite ? 1100 : 620;
+        const size = 0.58;
+        // skeleton vertices first (tight line segments)
+        const skeletonPoints = [];
+        for (let i = 0; i < 28; i++) skeletonPoints.push(new THREE.Vector3(0, 0.1 + i * 0.22, 0)); // spine/feet to head
+        // add limbs
+        for (let side = -1; side <= 1; side += 2) {
+            for (let j = 0; j < 8; j++) skeletonPoints.push(new THREE.Vector3(side * 0.7, 2.8 + j * 0.18, 0));
+        }
         for (let i = 0; i < numCubes; i++) {
             const geo = new THREE.BoxGeometry(size, size, size);
-            const mat = new THREE.MeshPhongMaterial({color: pastelColors[i % 4], emissive: pastelColors[i % 4], emissiveIntensity: 10.5, shininess: 18});
+            const mat = new THREE.MeshPhongMaterial({color: pastelColors[i % 4], emissive: pastelColors[i % 4], emissiveIntensity: 10.8, shininess: 18});
             const cube = new THREE.Mesh(geo, mat);
-            let x = ((i % 8) - 3.5) * 0.22;
-            let y = 0.4 + Math.floor(i / 8) * 0.22;
-            let z = (Math.random() - 0.5) * 0.09;
-            // skeleton build (tight spacing)
-            if (i < 32) y = 0.1; // feet
-            else if (i < 48) { x *= 0.6; y = 0.7; } // ankles
-            else if (i < 68) y = 1.3; // knees
-            else if (i < 92) y = 1.9; // hips
-            else if (i < 160) y = 2.4 + (i % 18) * 0.19; // spine
-            else if (i < 200) { x = (i % 2 ? -0.85 : 0.85); y = 4.1; } // shoulders
-            else if (i < 260) { x = (i % 2 ? -1.3 : 1.3); y = 3.6; } // arms
-            else if (i < 300) { x = (i % 2 ? -1.6 : 1.6); y = 2.9; } // wrists
-            else if (i < 380) { x = (i % 4 - 1.5) * 0.3; y = 2.6; z += 0.4; } // fingers + weapon staff
-            else if (i < 440) y = 5.1; // head
-            else if (i < 520) { x = (i % 2 ? -0.9 : 0.9); y = 5.4; } // horns/spikes
-            else if (i < 620) { x = (i % 3 - 1) * 0.25; y = 5.6 + i % 8 * 0.08; } // hair strands
-            cube.position.set(x, y, z);
+            // snap to nearest skeleton line
+            const nearest = skeletonPoints.reduce((a, b) => a.distanceTo(new THREE.Vector3((i % 12) * 0.12 - 0.7, 0.4 + Math.floor(i / 12) * 0.22, 0)) < b.distanceTo(new THREE.Vector3((i % 12) * 0.12 - 0.7, 0.4 + Math.floor(i / 12) * 0.22, 0)) ? a : b);
+            cube.position.copy(nearest);
+            cube.position.x += (Math.random() - 0.5) * 0.08;
+            cube.position.z += (Math.random() - 0.5) * 0.08;
             this.basePositions.push(cube.position.clone());
             this.add(cube);
             this.cubes.push(cube);
         }
         this.pulsePhase = Math.random() * Math.PI * 2;
-        this.userData = { health: isElite ? 320 : 120, speed: isElite ? 9.4 : 7.1, isElite, walkPhase: Math.random() * Math.PI * 2 };
+        this.userData = { health: isElite ? 320 : 120, speed: isElite ? 9.4 : 7.1, isElite };
         scene.add(this);
     }
     update(t) {
         const pulse = 1 + Math.sin(t * 3.4 + this.pulsePhase) * 0.085;
-        this.scale.setScalar(pulse * (this.userData.isElite ? 4.2 : 3.8));
+        this.scale.setScalar(pulse * (this.userData.isElite ? 4.1 : 3.7));
         this.cubes.forEach((c, i) => {
             const base = this.basePositions[i];
-            const warp = 0.078; // tight fill
+            const warp = 0.052; // TIGHT cohesive wrap
             c.position.x = base.x + Math.sin(t * 6.4 + i) * warp;
             c.position.y = base.y + Math.sin(t * 5.1 + i * 1.1) * warp;
             c.position.z = base.z + Math.cos(t * 4.2 + i) * warp;
+            // independent rainbow shift like terrain cubes
+            c.material.emissive.setHSL((t * 2.8 + i * 0.4) % 1, 1, 0.88);
             c.rotation.y = t * (1.6 + i * 0.012);
-            if (i > 380) c.rotation.x = t * 2.1 + i; // hair/spikes wiggle
-            // rainbow cycling on every cube
-            c.material.emissive.setHSL((t * 1.2 + i * 0.3) % 1, 1, 0.85);
-            // smooth walking stride
-            if (i < 68 && i > 32) c.position.y += Math.sin(t * 12 + this.userData.walkPhase) * 0.09; // legs
+            if (i % 48 < 12) c.position.y += Math.sin(t * 12) * 0.085; // smooth limb walk
         });
         this.position.y += Math.sin(t * 7.2) * 0.035;
     }
 }
 
-// psmv1.02 WORLDGEN — 100% untouched + forced visible
 function createPSMWorld() {
     const geo = new THREE.PlaneGeometry(520, 520, 128, 128);
-    const mat = new THREE.MeshPhongMaterial({color: 0x220033, emissive: 0xff0088, emissiveIntensity: 1.35, shininess: 10});
+    const mat = new THREE.MeshPhongMaterial({color: 0x220033, emissive: 0xff0088, emissiveIntensity: 2.8, shininess: 10});
     const floor = new THREE.Mesh(geo, mat);
     floor.rotation.x = -Math.PI / 2;
     scene.add(floor);
@@ -98,17 +90,18 @@ function startGame() {
 
 function initGameCore() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x110022, 12, 260);
+    scene.fog = new THREE.Fog(0x110022, 8, 280);
     camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({canvas: document.getElementById('game-canvas'), antialias: true});
     renderer.setSize(innerWidth, innerHeight);
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     clock = new THREE.Clock();
 
-    scene.add(new THREE.HemisphereLight(0x00ffff, 0xff0088, 1.35));
-    const dir = new THREE.DirectionalLight(0xffffff, 1.6); dir.position.set(50, 140, 60);
+    // strong lights for visible terrain
+    scene.add(new THREE.HemisphereLight(0x00ffff, 0xff0088, 2.2));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.8); dir.position.set(50, 140, 60);
     scene.add(dir);
-    scene.add(new THREE.AmbientLight(0x445566, 0.9));
+    scene.add(new THREE.AmbientLight(0x445566, 1.1));
 
     const world = createPSMWorld();
 
@@ -117,25 +110,23 @@ function initGameCore() {
     camera.position.copy(player.position);
     scene.add(player);
 
-    window.addEventListener('resize', () => {
-        camera.aspect = innerWidth / innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(innerWidth, innerHeight);
-    });
-
+    document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
     document.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
     document.addEventListener('mousedown', shoot);
+
+    window.addEventListener('gamepadconnected', e => gamepad = e.gamepad);
 
     spawnInitialEnemies();
     animate(world);
 }
 
-function spawnInitialEnemies() {
-    for (let i = 0; i < 5; i++) {
-        const e = new CubeBlobHumanoid(Math.random() < 0.35);
-        e.position.set((Math.random() - 0.5) * 100, 0, (Math.random() - 0.5) * 100);
-        enemies.push(e);
+function onMouseMove(e) {
+    if (document.pointerLockElement) {
+        yaw -= e.movementX * 0.002;
+        pitch -= e.movementY * 0.002;
+        pitch = Math.max(-1.5, Math.min(1.5, pitch));
+        camera.rotation.set(pitch, yaw, 0);
     }
 }
 
@@ -162,21 +153,32 @@ function animate(world) {
     const delta = clock.getDelta();
     const t = clock.getElapsedTime();
 
+    // Xbox support
+    if (gamepad) {
+        const x = gamepad.axes[0];
+        const z = gamepad.axes[1];
+        player.position.x += x * 12 * delta;
+        player.position.z += z * 12 * delta;
+    }
+
+    // WASD relative to camera yaw
     const speed = 25 * delta;
-    if (keys['w']) player.position.z -= speed;
-    if (keys['s']) player.position.z += speed;
-    if (keys['a']) player.position.x -= speed;
-    if (keys['d']) player.position.x += speed;
+    const forward = new THREE.Vector3(0, 0, -1).applyEuler(camera.rotation);
+    const right = new THREE.Vector3(1, 0, 0).applyEuler(camera.rotation);
+    if (keys['w']) player.position.addScaledVector(forward, speed);
+    if (keys['s']) player.position.addScaledVector(forward, -speed);
+    if (keys['a']) player.position.addScaledVector(right, -speed);
+    if (keys['d']) player.position.addScaledVector(right, speed);
     camera.position.copy(player.position);
     camera.position.y = 1.85;
 
-    // psmv1.02 pulsing terrain — exact + visible
+    // psmv1.02 visible pulsing terrain
     world.mat.emissive.setHSL(0.84 + Math.sin(t * 0.38) * 0.11, 1, 0.52);
     const verts = world.verts;
     for (let i = 0; i < verts.count; i++) {
         const x = verts.getX(i);
         const z = verts.getZ(i);
-        verts.setY(i, Math.sin(x * 0.028 + t * 1.9) * 2.8 + Math.cos(z * 0.035 + t * 2.3) * 2.1);
+        verts.setY(i, Math.sin(x * 0.028 + t * 1.9) * 3.5 + Math.cos(z * 0.035 + t * 2.3) * 2.8);
     }
     verts.needsUpdate = true;
     world.floor.geometry.computeVertexNormals();
@@ -197,4 +199,12 @@ function animate(world) {
     });
 
     renderer.render(scene, camera);
+}
+
+function spawnInitialEnemies() {
+    for (let i = 0; i < 5; i++) {
+        const e = new CubeBlobHumanoid(Math.random() < 0.35);
+        e.position.set((Math.random() - 0.5) * 100, 0, (Math.random() - 0.5) * 100);
+        enemies.push(e);
+    }
 }
