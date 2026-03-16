@@ -1,6 +1,0 @@
-body { perspective:1200px; }
-#game-title { font-size:58px;font-weight:900;letter-spacing:6px;background:linear-gradient(90deg,#ff00ff,#00ffff,#ffff00,#ff00ff,#00ff00);-webkit-background-clip:text;color:transparent;background-size:300% 100%;animation:rainbowPulse 1.8s linear infinite;text-shadow:0 0 20px #fff; }
-@keyframes rainbowPulse { 0% {background-position:0% 50%;} 100% {background-position:300% 50%;} }
-.title-button { background:transparent;border:4px solid #ff00aa;color:#ff00aa;font-size:30px;padding:9px 38px;cursor:pointer;text-shadow:0 0 25px #ff00aa,0 0 50px #00ffff;transition:all .1s; }
-.title-button:hover { animation:violentThrob .54s infinite alternate; }
-@keyframes violentThrob { 0% {transform:scale(1);box-shadow:0 0 30px #ff00aa,0 0 60px #00ffff;} 100% {transform:scale(1.18);box-shadow:0 0 70px #ffff00,0 0 120px #ff0088;} }
