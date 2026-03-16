@@ -1,34 +1,32 @@
+import { createStartScreen } from './ui-manager.js';
 import { MultiverseSky } from './multiverse-sky.js';
 import { AcidDreamEnemy } from './acid-dream-enemy.js';
 import { InputManager } from './input-manager.js';
-import { UIManager } from './ui-manager.js';
-import neonCrystalLoader from '../neon-crystal-loader.js'; // your original loader
 
-export async function initGame() {
-    const ui = new UIManager();
-    const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 2000);
-    const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('game-canvas'), antialias:true});
-    renderer.setSize(innerWidth, innerHeight);
+export function initGame() {
+  createStartScreen();   // fixes your exact error
 
-    const sky = new MultiverseSky(scene);
-    const enemies = [];
-    const input = new InputManager(camera);
-    const clock = new THREE.Clock();
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+  const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('game-canvas'), antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
 
-    // start sequence exactly like OG
-    ui.showLoading();
-    await neonCrystalLoader(); // your original loader
-    ui.hideLoading();
-    ui.overlay.innerHTML = `<!-- exact OG start screen HTML from your index.html -->`;
-    // buttons call ui.startGame(hardcoreFlag, tipsFlag, musicFlag)
+  const sky = new MultiverseSky(scene);
+  const enemies = [];
+  for (let i = 0; i < 5; i++) enemies.push(new AcidDreamEnemy(scene, new THREE.Vector3(Math.random()*400-200, 0, Math.random()*400-200)));
+  const input = new InputManager(camera);
 
-    function animate() {
-        const delta = clock.getDelta();
-        sky.update(delta, camera);
-        enemies.forEach(e => e.update(delta, camera.position));
-        input.update(delta, camera.position);
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
-    }
-    window.startGame = (hardcore, tips, music) => { ui.startGame(hardcore, tips, music); animate(); };
+  const clock = new THREE.Clock();
+  function animate() {
+    const delta = clock.getDelta();
+    sky.update(delta, camera);
+    enemies.forEach(e => e.update(delta, camera.position));
+    input.update(delta, camera.position);
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+  window.startGame = () => {
+    document.getElementById('overlay').classList.add('hidden');
+    animate();
+  };
 }
