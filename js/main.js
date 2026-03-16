@@ -1,7 +1,7 @@
+import runOnboarding from '../neon-crystal-loader.js';
 import { MultiverseSky } from './multiverse-sky.js';
 import { AcidDreamEnemy } from './acid-dream-enemy.js';
 import { InputManager } from './input-manager.js';
-import runOnboarding from '../neon-crystal-loader.js';
 
 export async function initGame() {
   const scene = new THREE.Scene();
@@ -16,7 +16,7 @@ export async function initGame() {
   const input = new InputManager(camera);
   const clock = new THREE.Clock();
 
-  await runOnboarding();  // full enhanced onboarding (14s, 28 crystals, stages)
+  await runOnboarding();  // fires the refined loader now
 
   function animate() {
     const delta = clock.getDelta();
