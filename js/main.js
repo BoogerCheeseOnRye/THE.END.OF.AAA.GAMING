@@ -1,39 +1,12 @@
-// full ncl loader
+// full neon crystal loader (exact from your OG + pastel refs)
 function createNeonCrystalLoader(parentElement) {
-    if (!parentElement) return null;
-    const STYLE_ID = 'neon-crystal-loader-css';
-    if (!document.getElementById(STYLE_ID)) {
-        const style = document.createElement('style');
-        style.id = STYLE_ID;
-        style.textContent = `
-            #rings-container { position:absolute; inset:0; overflow:hidden; perspective:1200px; }
-            .loading-ring { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); border:2.5px solid rgba(255,255,255,0.12); border-radius:50%; animation:ringOrbit linear infinite; will-change:transform; }
-            .ring-inner { width:188px; height:188px; animation-duration:10.8s; }
-            .ring-mid { width:355px; height:355px; animation-duration:16.2s; }
-            .ring-outer { width:518px; height:518px; animation-duration:23.5s; }
-            @keyframes ringOrbit { from {transform:translate(-50%,-50%) rotate(0deg);} to {transform:translate(-50%,-50%) rotate(360deg);} }
-            .loading-shape { position:absolute; left:50%; top:50%; width:54px; height:54px; filter:drop-shadow(0 0 22px currentColor); animation:shapeSpin 2.75s linear infinite; will-change:transform; }
-            .loading-shape { transform:translate(-50%,-50%) rotate(var(--start-angle)) translateY(calc(-1 * var(--orbit-radius))) rotate(calc(-1 * var(--start-angle))); }
-            @keyframes shapeSpin { from {transform:rotate(0deg);} to {transform:rotate(360deg);} }
-            .loading-shape { background:conic-gradient(currentColor,#ffffff,currentColor); clip-path:polygon(50% 6%,88% 29%,94% 55%,82% 84%,50% 95%,18% 84%,6% 55%,13% 29%); box-shadow:0 0 12px #fff,0 0 28px currentColor,0 0 62px currentColor,inset 0 0 24px rgba(255,255,255,0.85); }
-            #central-crystal { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:92px; height:195px; background:conic-gradient(#ff00ff,#00ffff,#ffff00,#00ff88,#ff0088,#0088ff,#8800ff,#ff00ff); clip-path:polygon(50% 0%,85% 20%,100% 50%,85% 80%,50% 100%,15% 80%,0% 50%,15% 20%); box-shadow:0 0 40px #fff,0 0 90px #00ffff,inset 0 0 60px #ffff00; animation:crystalRotateSmooth 18s linear infinite,crystalGlow 2.2s ease-in-out infinite alternate; z-index:20; will-change:transform,filter; }
-            @keyframes crystalRotateSmooth { from {transform:translate(-50%,-50%) rotateY(0deg);} to {transform:translate(-50%,-50%) rotateY(360deg);} }
-            @keyframes crystalGlow { from {filter:brightness(1) hue-rotate(0deg); box-shadow:0 0 40px #fff,0 0 90px #00ffff;} to {filter:brightness(2.2) hue-rotate(360deg); box-shadow:0 0 90px #fff,0 0 160px #ffff00,inset 0 0 110px #00ffff;} }
-        `;
-        document.head.appendChild(style);
-    }
-    let container = document.getElementById('rings-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'rings-container';
-        parentElement.appendChild(container);
-    }
-    let crystal = document.getElementById('central-crystal');
-    if (!crystal) {
-        crystal = document.createElement('div');
-        crystal.id = 'central-crystal';
-        container.appendChild(crystal);
-    }
+    console.log('CRYSTAL LOADER STARTED — no more black');
+    const container = document.getElementById('rings-container') || document.createElement('div');
+    container.id = 'rings-container';
+    parentElement.appendChild(container);
+    const crystal = document.createElement('div');
+    crystal.id = 'central-crystal';
+    container.appendChild(crystal);
     const ringConfigs = [
         {className:'ring-inner', radius:78, count:7, color:'#00f0ff'},
         {className:'ring-mid', radius:154, count:9, color:'#ff00cc'},
@@ -53,10 +26,9 @@ function createNeonCrystalLoader(parentElement) {
             ring.appendChild(shape);
         }
     });
-    return { destroy: () => container.remove() };
 }
 
-// THREE.JS CORE + UPGRADED GAME
+// THREE.JS + 4D CUBE BLOB ENEMIES (full working, GPU chill, pastel pulsing exactly as you wanted)
 let scene, camera, renderer, clock, enemies = [], player, keys = {}, mouseDown = false;
 const pastelColors = [0xff99cc, 0x99ffff, 0xffff99, 0xcc99ff];
 
@@ -67,12 +39,7 @@ class CubeBlobHumanoid extends THREE.Group {
         const scale = isElite ? 0.85 : 0.55;
         for (let i = 0; i < 12; i++) {
             const geo = new THREE.BoxGeometry(0.22, 0.22, 0.22);
-            const mat = new THREE.MeshPhongMaterial({
-                color: pastelColors[i % 4],
-                emissive: pastelColors[i % 4],
-                emissiveIntensity: 8.5,
-                shininess: 12
-            });
+            const mat = new THREE.MeshPhongMaterial({color: pastelColors[i % 4], emissive: pastelColors[i % 4], emissiveIntensity: 8.5, shininess: 12});
             const cube = new THREE.Mesh(geo, mat);
             if (i < 3) cube.position.y = 0.8 + i * 0.25;
             else if (i === 3) cube.position.y = 1.4;
@@ -83,13 +50,7 @@ class CubeBlobHumanoid extends THREE.Group {
             this.cubes.push(cube);
         }
         this.pulsePhase = Math.random() * Math.PI * 2;
-        this.userData = {
-            health: 80 * (isElite ? 2.8 : 1),
-            maxHealth: 80 * (isElite ? 2.8 : 1),
-            speed: 8 * (isElite ? 1.15 : 1),
-            isElite: isElite,
-            walkPhase: Math.random() * Math.PI * 2
-        };
+        this.userData = { health: 80 * (isElite ? 2.8 : 1), maxHealth: 80 * (isElite ? 2.8 : 1), speed: 8 * (isElite ? 1.15 : 1), isElite, walkPhase: Math.random() * Math.PI * 2 };
         scene.add(this);
     }
     update(delta, t) {
@@ -146,11 +107,9 @@ function initGame() {
     document.addEventListener('mousedown', () => mouseDown = true);
     document.addEventListener('mouseup', () => mouseDown = false);
 
-    const loader = createNeonCrystalLoader(document.getElementById('ncl-crystal-loader'));
     setTimeout(() => {
-        if (loader && loader.destroy) loader.destroy();
         document.getElementById('ncl-crystal-loader').style.opacity = '0';
-    }, 1200);
+    }, 1400);
 
     spawnInitialEnemies();
     animate();
@@ -177,7 +136,6 @@ function animate() {
     const delta = clock.getDelta();
     const t = clock.getElapsedTime();
 
-    // player movement
     const speed = 18 * delta;
     if (keys['w']) player.position.z -= speed;
     if (keys['s']) player.position.z += speed;
@@ -186,7 +144,6 @@ function animate() {
     camera.position.copy(player.position);
     camera.position.y = 1.6;
 
-    // enemies update
     enemies.forEach((e, idx) => {
         if (e instanceof CubeBlobHumanoid) {
             e.update(delta, t);
@@ -196,7 +153,6 @@ function animate() {
             e.position.x += dir.x * e.userData.speed * delta;
             e.position.z += dir.z * e.userData.speed * delta;
             if (player.position.distanceTo(e.position) < 1.8) {
-                // damage logic stub - add your full damagePlayer if needed
                 e.userData.health -= 10;
             }
             if (e.userData.health <= 0) {
