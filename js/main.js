@@ -1,19 +1,26 @@
 import { MultiverseSky } from './multiverse-sky.js';
 import { AcidDreamEnemy } from './acid-dream-enemy.js';
 import { InputManager } from './input-manager.js';
-import { createStartScreen } from './ui-start-screen.js';
+import { UIManager } from './ui-manager.js';
+import neonCrystalLoader from '../neon-crystal-loader.js'; // your original loader
 
-export function initGame() {
-    createStartScreen();
+export async function initGame() {
+    const ui = new UIManager();
     const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 2000);
-    const renderer = new THREE.WebGLRenderer({antialias:true}); renderer.setSize(innerWidth, innerHeight); document.body.appendChild(renderer.domElement);
+    const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('game-canvas'), antialias:true});
+    renderer.setSize(innerWidth, innerHeight);
 
     const sky = new MultiverseSky(scene);
     const enemies = [];
-    for (let i = 0; i < 5; i++) enemies.push(new AcidDreamEnemy(scene, new THREE.Vector3(Math.random()*400,0,Math.random()*400)));
-
-    const input = new InputManager(camera, camera.position);
+    const input = new InputManager(camera);
     const clock = new THREE.Clock();
+
+    // start sequence exactly like OG
+    ui.showLoading();
+    await neonCrystalLoader(); // your original loader
+    ui.hideLoading();
+    ui.overlay.innerHTML = `<!-- exact OG start screen HTML from your index.html -->`;
+    // buttons call ui.startGame(hardcoreFlag, tipsFlag, musicFlag)
 
     function animate() {
         const delta = clock.getDelta();
@@ -23,5 +30,5 @@ export function initGame() {
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
     }
-    window.startGame = () => { document.getElementById('start-screen').classList.add('hidden'); animate(); };
+    window.startGame = (hardcore, tips, music) => { ui.startGame(hardcore, tips, music); animate(); };
 }
