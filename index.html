@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>THE.END.OF.AAA.GAMING - GPU MULTIVERSE EDITION</title>
+    <title>THE.END.OF.AAA.GAMING - GPU MULTIVERSE</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 </head>
 <body>
-    <div id="start-screen"></div>
+    <div id="overlay"></div>
+    <div id="loading-screen"></div>
+    <canvas id="game-canvas"></canvas>
     <script type="module">
         import { initGame } from './js/main.js';
         initGame();
