@@ -1,0 +1,21 @@
+body { margin:0; overflow:hidden; background:#000; font-family:'Courier New', monospace; }
+canvas { display:block; }
+#start-screen {
+    position:absolute; inset:0; background:rgba(3,0,12,0.98); z-index:999;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:#ff00aa; text-align:center; transition:opacity .8s;
+}
+#start-screen.hidden { opacity:0; pointer-events:none; }
+#game-title {
+    font-size:68px; font-weight:900; letter-spacing:8px;
+    background:linear-gradient(90deg,#ff00ff,#00ffff,#ffff00); -webkit-background-clip:text; color:transparent;
+    text-shadow:0 0 30px #fff; animation:rainbowPulse 1.6s linear infinite;
+}
+@keyframes rainbowPulse { 0%{background-position:0%} 100%{background-position:300%} }
+.title-button {
+    border:5px solid #ff00aa; color:#ff00aa; font-size:32px; padding:14px 48px; margin:20px;
+    cursor:pointer; text-shadow:0 0 25px #ff00aa; transition:all .1s;
+}
+.title-button:hover { transform:scale(1.15); box-shadow:0 0 60px #ffff00; }
+.blood-drop { position:absolute; width:4px; height:18px; background:#ff0000; animation:bloodDrip 1.2s linear forwards; }
+@keyframes bloodDrip { to { transform:translateY(900px); opacity:0; } }
