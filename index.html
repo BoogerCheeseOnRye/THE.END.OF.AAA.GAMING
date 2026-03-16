@@ -12,7 +12,7 @@
     <canvas id="game-canvas"></canvas>
     <script type="module">
         import { initGame } from './js/main.js';
-        initGame();
+        window.addEventListener('load', initGame);
     </script>
 </body>
 </html>
