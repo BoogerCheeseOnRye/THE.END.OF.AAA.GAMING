@@ -8,7 +8,7 @@ class CubeBlobHumanoid extends THREE.Group {
         const num = 820;
         for (let i = 0; i < num; i++) {
             const cube = new THREE.Mesh(new THREE.BoxGeometry(0.48,0.48,0.48), new THREE.MeshPhongMaterial({color: pastelColors[i%4], emissive: pastelColors[i%4], emissiveIntensity: 11}));
-            cube.position.y = -3 + Math.random() * 1; // starts underground
+            cube.position.y = -3 + Math.random() * 1;
             this.cubes.push(cube);
             this.add(cube);
         }
@@ -16,7 +16,7 @@ class CubeBlobHumanoid extends THREE.Group {
     }
     update(t) {
         this.cubes.forEach((c, i) => {
-            c.position.y += Math.sin(t * 5.1 + i) * 0.085; // exact same rise as your terrain
+            c.position.y += Math.sin(t * 5.1 + i) * 0.085;
             c.material.emissive.setHSL((t * 2.8 + i * 0.42) % 1, 1, 0.88);
         });
     }
@@ -55,7 +55,7 @@ function initGame() {
 
     player = new THREE.Object3D();
     player.position.set(0, 2, 30);
-    camera.position.set(0, 8, 40); // Megabonk 3rd person
+    camera.position.set(0, 8, 40);
     scene.add(player);
 
     for (let i = 0; i < 5; i++) {
