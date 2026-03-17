@@ -1,4 +1,4 @@
-let scene, camera, renderer, clock, enemies = [], player, keys = {}, isGameRunning = false;
+var scene, camera, renderer, clock, enemies = [], player, keys = {}, isGameRunning = false;
 const pastelColors = [0xff99cc, 0x99ffff, 0xffff99, 0xcc99ff];
 
 class CubeBlobHumanoid extends THREE.Group {
@@ -53,6 +53,9 @@ function initGame() {
     renderer.setSize(innerWidth, innerHeight);
     clock = new THREE.Clock();
 
+    const ambient = new THREE.AmbientLight(0x404040, 0.6); scene.add(ambient);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2); dirLight.position.set(50,100,50); scene.add(dirLight);
+
     player = new THREE.Object3D();
     player.position.set(0, 2, 30);
     camera.position.set(0, 8, 40);
@@ -63,7 +66,7 @@ function initGame() {
         e.position.set((Math.random()-0.5)*80, 0, (Math.random()-0.5)*80);
         enemies.push(e);
     }
-    updateChunks(); // bigger level core worldgen colors + pulsing
+    initWorld();
 
     animate();
 }
@@ -73,7 +76,7 @@ function animate() {
     if (!isGameRunning) return;
     const t = clock.getElapsedTime();
     enemies.forEach(e => e.update(t));
-    updateChunks(); // pulsing chunks
+    updateChunks();
     renderer.render(scene, camera);
 }
 
