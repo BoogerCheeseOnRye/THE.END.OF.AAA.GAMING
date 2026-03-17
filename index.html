@@ -10,18 +10,21 @@
 <body style="margin:0;overflow:hidden;background:#000;">
     <canvas id="game-canvas"></canvas>
 
+    <!-- LOADER FIRST - bigger thicker Valhalla text -->
     <div id="ncl-crystal-loader" style="position:fixed;inset:0;z-index:300;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;">
         <div id="rings-container"></div>
         <div id="valhalla-text">ENTERING VALHALLA</div>
         <div id="progress-bar"><div id="progress-fill"></div></div>
     </div>
 
+    <!-- MAIN MENU - only this shows after loader -->
     <div id="menu-screen" class="hidden" style="position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;">
         <div id="game-title">THE.END.OF.AAA.GAMING</div>
         <div onclick="startGame()" class="title-button">ENTER THE VOID</div>
         <div onclick="openCharacterCreator()" class="title-button">CUSTOMIZE WARRIOR</div>
     </div>
 
+    <!-- CHARACTER CREATOR - only opens when button pressed -->
     <div id="creator-modal" class="hidden" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.96);display:flex;align-items:center;justify-content:center;">
         <div class="modal-card">
             <h2 style="color:#ff00aa;font-size:42px;margin-bottom:30px;">CUSTOMIZE YOUR WARRIOR</h2>
