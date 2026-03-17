@@ -34,24 +34,8 @@
         </div>
     </div>
 
-    <script src="terrain-core.html"></script>
-    <script src="prototype.html"></script>
+    <script src="js/terrain-logic.js"></script>
+    <script src="js/controls-logic.js"></script>
     <script src="js/main.js"></script>
-    <script>
-        window.addEventListener('load', () => {
-            createNeonCrystalLoader();
-            let progress = 0;
-            const bar = document.getElementById('progress-fill');
-            const interval = setInterval(() => {
-                progress += 4.2;
-                bar.style.width = `${progress}%`;
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    document.getElementById('ncl-crystal-loader').style.opacity = '0';
-                    setTimeout(() => document.getElementById('menu-screen').classList.remove('hidden'), 600);
-                }
-            }, 28);
-        });
-    </script>
 </body>
 </html>
