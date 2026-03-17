@@ -19,3 +19,4 @@ function generateChunk(cx,cz){
   const col=new THREE.Color().setHSL(hue,1.0,0.78);idx++;}}mesh.count=idx;scene.add(mesh);chunks.push(mesh);}}
 function updateChunks(){const t=clock.getElapsedTime();chunks.forEach(m=>{for(let i=0;i<m.count;i++){const mat=new THREE.Matrix4();m.getMatrixAt(i,mat);const pos=new THREE.Vector3();pos.setFromMatrixPosition(mat);pos.y+=Math.sin(t*5.1+i)*0.085;const nMat=new THREE.Matrix4().makeTranslation(pos.x,pos.y,pos.z);m.setMatrixAt(i,nMat);}m.instanceMatrix.needsUpdate=true;});}
 initWorld();
+ 
