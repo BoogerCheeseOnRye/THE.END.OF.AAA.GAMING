@@ -63,6 +63,7 @@ function initGame() {
         e.position.set((Math.random()-0.5)*80, 0, (Math.random()-0.5)*80);
         enemies.push(e);
     }
+    updateChunks(); // bigger level core worldgen colors + pulsing
 
     animate();
 }
@@ -72,6 +73,7 @@ function animate() {
     if (!isGameRunning) return;
     const t = clock.getElapsedTime();
     enemies.forEach(e => e.update(t));
+    updateChunks(); // pulsing chunks
     renderer.render(scene, camera);
 }
 
