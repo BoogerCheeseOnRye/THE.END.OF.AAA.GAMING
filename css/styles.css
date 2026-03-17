@@ -1,6 +1,7 @@
 body { perspective:1200px; }
-#game-title { font-size:92px;font-weight:900;letter-spacing:8px;background:linear-gradient(90deg,#ff00ff,#00ffff,#ffff00,#ff00ff,#00ff00);-webkit-background-clip:text;color:transparent;background-size:300% 100%;animation:rainbowPulse 1.6s linear infinite;text-shadow:0 0 30px #fff; }
+#valhalla-text { font-size:118px;font-weight:900;letter-spacing:14px;background:linear-gradient(90deg,#ff00ff,#00ffff,#ffff00,#ff00ff,#00ff00);-webkit-background-clip:text;color:transparent;background-size:300% 100%;animation:rainbowPulse 1.35s linear infinite;text-shadow:0 0 35px #fff,0 0 70px #ff00aa,0 0 110px #00ffff;-webkit-text-stroke:4px #ffffff; }
 @keyframes rainbowPulse { 0% {background-position:0% 50%;} 100% {background-position:300% 50%;} }
 .title-button { background:transparent;border:4px solid #ff00aa;color:#ff00aa;font-size:32px;padding:12px 48px;cursor:pointer;text-shadow:0 0 25px #ff00aa,0 0 50px #00ffff;transition:all .1s; }
 .title-button:hover { animation:violentThrob .54s infinite alternate; }
 @keyframes violentThrob { 0% {transform:scale(1);box-shadow:0 0 30px #ff00aa,0 0 60px #00ffff;} 100% {transform:scale(1.18);box-shadow:0 0 70px #ffff00,0 0 120px #ff0088;} }
+.modal-card { background:rgba(0,0,0,0.95);border:6px solid #ff00aa;padding:40px;width:440px;text-align:center;color:#ff00aa;box-shadow:0 0 60px #ff00aa; }
