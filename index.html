@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>THE.END.OF.AAA.GAMING - 4D CUBE VALHALLA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+</head>
+<body style="margin:0;overflow:hidden;background:#000;">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- REFINED LOADER - bigger/thicker Valhalla text (voidscream style) -->
+    <div id="ncl-crystal-loader" style="position:fixed;inset:0;z-index:300;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+        <div id="rings-container"></div>
+        <div id="valhalla-text">ENTERING VALHALLA</div>
+        <div id="progress-bar"><div id="progress-fill"></div></div>
+    </div>
+
+    <!-- MAIN MENU -->
+    <div id="menu-screen" class="hidden" style="position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;">
+        <div id="game-title">THE.END.OF.AAA.GAMING</div>
+        <div onclick="startGame()" class="title-button">ENTER THE VOID</div>
+        <div onclick="openCharacterCreator()" class="title-button">CUSTOMIZE WARRIOR</div>
+    </div>
+
+    <!-- CHARACTER CREATOR MODAL -->
+    <div id="creator-modal" class="hidden" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.96);display:flex;align-items:center;justify-content:center;">
+        <div class="modal-card">
+            <h2 style="color:#ff00aa;font-size:42px;margin-bottom:30px;">CUSTOMIZE YOUR WARRIOR</h2>
+            <div id="player-preview" style="width:280px;height:380px;background:#111;"></div>
+            <button onclick="saveWarrior()" class="title-button" style="margin-top:30px;">SAVE WARRIOR</button>
+            <button onclick="closeCharacterCreator()" class="title-button" style="margin-top:12px;">CANCEL</button>
+        </div>
+    </div>
+
+    <script src="terrain-core.html"></script>
+    <script src="prototype.html"></script>
+    <script src="js/main.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            createNeonCrystalLoader();
+            let progress = 0;
+            const bar = document.getElementById('progress-fill');
+            const interval = setInterval(() => {
+                progress += 4.2;
+                bar.style.width = `${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    document.getElementById('ncl-crystal-loader').style.opacity = '0';
+                    setTimeout(() => document.getElementById('menu-screen').classList.remove('hidden'), 600);
+                }
+            }, 28);
+        });
+    </script>
+</body>
+</html>
