@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/void-game/"
+title = "THE END OF AAA GAMING"
+version = "1.0.0"
+id = "artifacts/void-game"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+localPort = 25965
+name = "web"
+paths = ["/void-game/"]
+
+[services.development]
+run = "pnpm --filter @workspace/void-game run dev"
+
+[services.env]
+PORT = "25965"
+BASE_PATH = "/void-game/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/void-game", "run", "build"]
+publicDir = "artifacts/void-game/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
